@@ -74,6 +74,7 @@ int main(){
             continue;
         }
 
+
         /*s-a realizat conexiunea, se asteapta mesajul*/
         /*ne asiguram ca bufferul nu contine nimic*/
         bzero(msg, 100);

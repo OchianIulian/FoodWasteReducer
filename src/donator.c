@@ -61,6 +61,15 @@ int main(int argc, char *argv[]){
         return errno;
     }
 
+    /*citirea mesajului*/
+    bzero(msg, 100);
+    if(recv(sd, msg, 100, 0) < 0){
+        perror("[nevoias]eroare la recv()\n");
+        return errno;
+    }
+
+    printf("[nevoias]Mesajul primit este: %s\n", msg);
+
     close(sd);
 
 }
