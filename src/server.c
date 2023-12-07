@@ -16,6 +16,7 @@ extern int errno;
 int main(){
     struct sockaddr_in server;/*structura folosita de server*/
     struct sockaddr_in from;/*structura clientului*/
+    struct sockaddr_in to;
     char msg[100];/*mesajul primit de la client*/
     char msgrasp[100]="";/*mesaj de raspuns pentru client*/
     int sd;/*socket descriptor*/
