@@ -27,7 +27,7 @@ int main(int argc, char*argv[]){
 
     /*stabilim portul*/
     port  = atoi(argv[2]);
-
+    printf("inainte de socket()\n");
     /*cream socketul*/
     /*
         ultimul parametru e 0, ca valoare pentru protocol, sa fie ales automat de sistem
@@ -46,12 +46,28 @@ int main(int argc, char*argv[]){
     /*stabilim id ul*/
     server.sin_addr.s_addr = inet_addr(argv[1]);
 
+    printf("inainte de connect\n");
+
     /*ne conectam la server*/
     if(connect(sd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1){
         perror("[nevoias]eroare la connect\n");
         return errno;
     }
 
+    // char msg[100];
+    // bzero(msg, 100);
+    /* Message to be sent to the server after connection */
+    char msg_to_server[] = "Hello from nevoias";
+
+    /* Send a message to the server after connecting */
+    if (send(sd, msg_to_server, sizeof(msg_to_server), 0) <= 0) {
+        perror("[nevoias] Error sending message to server\n");
+        return errno;
+    }
+
+    
+    /**/
+    printf("inainte de recv\n");
     /*citirea mesajului*/
     bzero(msg_rec, 100);
     if(recv(sd, msg_rec, 100, 0) < 0){

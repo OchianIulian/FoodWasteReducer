@@ -13,6 +13,8 @@
 /*codul de eroare returnat de anumite apeluri*/
 extern int errno;
 
+
+
 int main(){
     struct sockaddr_in server;/*structura folosita de server*/
     struct sockaddr_in from;/*structura clientului*/
@@ -20,6 +22,7 @@ int main(){
     char msg[100];/*mesajul primit de la client*/
     char msgrasp[100]="";/*mesaj de raspuns pentru client*/
     int sd;/*socket descriptor*/
+
 
     /*crearea unui socket*/
     if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
@@ -85,10 +88,7 @@ int main(){
         }
 
         printf("Mesajul a fost receptionat...%s\n", msg);
-
-
-
-
+        send(client, msg, strlen(msg), 0);
         close(client);
     }
     
