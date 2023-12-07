@@ -85,7 +85,7 @@ int main(){
         /*s-a realizat conexiunea, se asteapta mesajul*/
         /*ne asiguram ca bufferul nu contine nimic*/
         bzero(msg, 100);
-        printf("[server]asteptam mesajul...");
+        printf("[server]asteptam alimentul...");
         fflush(stdout);
 
         /*citirea citim mesajul*/

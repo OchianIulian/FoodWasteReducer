@@ -20,21 +20,11 @@ typedef struct {
     int cantity;
 } Aliment;
 
-int main(int argc, char*argv[]){
+int setup_server(char *server_address){
     int sd;/*socket descriptor*/
-    struct sockaddr_in server;/*structura folosita pentru conectarea cu serverul*/
-    char msg_rec[100];/*mesajul primit*/
+    struct sockaddr_in server;/*structura folosita pentru conectarea cu serverul*/ 
 
-    /*exista toate argumentele in linia de comanda?*/
-    if(argc != 3){
-        printf("sintaxa: %s <adresa_server> <port>\n", argv[0]);
-        return errno;
-    }
-
-    /*stabilim portul*/
-    port  = atoi(argv[2]);
-    printf("inainte de socket()\n");
-    /*cream socketul*/
+        /*cream socketul*/
     /*
         ultimul parametru e 0, ca valoare pentru protocol, sa fie ales automat de sistem
         TCP, UDP, IP, HTTP, SMTP
@@ -50,7 +40,7 @@ int main(int argc, char*argv[]){
     /*stabilim portul*/
     server.sin_port = htons(port);
     /*stabilim id ul*/
-    server.sin_addr.s_addr = inet_addr(argv[1]);
+    server.sin_addr.s_addr = inet_addr(server_address);
 
     printf("inainte de connect\n");
 
@@ -60,10 +50,24 @@ int main(int argc, char*argv[]){
         return errno;
     }
 
-    // char msg[100];
-    // bzero(msg, 100);
-    /* Message to be sent to the server after connection */
-    //char msg_to_server[] = "Hello from nevoias";
+    return sd;
+}
+
+int main(int argc, char*argv[]){
+    int sd;/*socket descriptor*/
+    char msg_rec[100];/*mesajul primit*/
+
+    /*exista toate argumentele in linia de comanda?*/
+    if(argc != 3){
+        printf("sintaxa: %s <adresa_server> <port>\n", argv[0]);
+        return errno;
+    }
+    /*stabilim portul*/
+    port  = atoi(argv[2]);
+    /*facem conexiunea si setam socketul*/
+    sd = setup_server(argv[1]);
+
+
     Aliment alimentSurplus;
     alimentSurplus.id = 1;//vine de la donator
     printf("Introdu numele produsului: ");
@@ -80,16 +84,6 @@ int main(int argc, char*argv[]){
         perror("[client] Eroare la write\n");
         return errno;
     }
-
-
-    /*citirea mesajului*/
-    // bzero(msg_rec, 100);
-    // if(recv(sd, msg_rec, 100, 0) < 0){
-    //     perror("[nevoias]eroare la recv()\n");
-    //     return errno;
-    // }
-
-    // printf("[nevoias]Mesajul primit este: %s\n", msg_rec);
 
     /*inchidem conexiunea*/
     close(sd);

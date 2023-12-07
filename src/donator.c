@@ -20,19 +20,9 @@ typedef struct {
     int cantity;
 } Aliment;
 
-int main(int argc, char *argv[]){
+int setup_server(char *server_address){
     int sd;//descriptorul de socket
     struct sockaddr_in server;//structura pentru server
-    char msg[100];//mesajul de trimis
-
-    /*verificam daca exista 3 argumente in apelare*/
-    if(argc!=3){
-        printf("Sintaxa: %s <adresa_server> <port>\n", argv[0]);
-        return errno;
-    }
-
-    /*stabilim portul*/
-    port = atoi(argv[2]);
 
     /*ultimul parametru e 0, ca valoare pentru protocol, sa fie ales automat de sistem*/
     if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
@@ -46,19 +36,30 @@ int main(int argc, char *argv[]){
     /*portul*/
     server.sin_port = htons(port);
     /*adresa IP a serverului*/
-    server.sin_addr.s_addr = inet_addr(argv[1]);
+    server.sin_addr.s_addr = inet_addr(server_address);
 
     /*ne conectam la server*/
     if(connect(sd, (struct sockaddr*)&server, sizeof(struct sockaddr)) == -1){
         perror("[client]Eroare la connect\n");
         return errno;
     }
+    return sd;
+}
 
-    /*citirea alimentului*/
-    // bzero(msg, 100);
-    // printf("[client]Introduceti un nume:  ");
-    // fflush(stdout);
-    // read(0, msg, 100);
+int main(int argc, char *argv[]){
+    int sd;
+    char msg[100];//mesajul de trimis
+
+    /*verificam daca exista 3 argumente in apelare*/
+    if(argc!=3){
+        printf("Sintaxa: %s <adresa_server> <port>\n", argv[0]);
+        return errno;
+    }
+
+    /*stabilim portul*/
+    port = atoi(argv[2]);
+    sd = setup_server(argv[1]);
+    
 
     Aliment alimentSurplus;
     alimentSurplus.id = 1;//vine de la donator
@@ -76,15 +77,6 @@ int main(int argc, char *argv[]){
         perror("[client] Eroare la write\n");
         return errno;
     }
-
-    /*citirea mesajului*/
-    // bzero(msg, 100);
-    // if(recv(sd, msg, 100, 0) < 0){
-    //     perror("[nevoias]eroare la recv()\n");
-    //     return errno;
-    // }
-
-    // printf("[nevoias]Mesajul primit este: %s\n", msg);
 
     close(sd);
 
