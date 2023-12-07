@@ -13,6 +13,11 @@
 /*codul de eroare returnat de anumite apeluri*/
 extern int errno;
 
+typedef struct {
+    int id;/*1 pentru donator 0  pentru nevoias*/
+    char nume[50];
+    int cantity;
+} Aliment;
 
 
 int main(){
@@ -74,7 +79,9 @@ int main(){
             continue;
         }
 
-
+        Aliment receivedAliment;    
+        memset(&receivedAliment, 0, sizeof(Aliment));
+        
         /*s-a realizat conexiunea, se asteapta mesajul*/
         /*ne asiguram ca bufferul nu contine nimic*/
         bzero(msg, 100);
@@ -82,14 +89,15 @@ int main(){
         fflush(stdout);
 
         /*citirea citim mesajul*/
-        if(recv(client, msg, 100, 0)<=0){//ultimul parametru este setat pe 0 pentru o operațiune de recepție standard.
+        if(recv(client, &receivedAliment, sizeof(Aliment), 0)<=0){//ultimul parametru este setat pe 0 pentru o operațiune de recepție standard.
             perror("[server]Eroare la read() de la client");
             fflush(stdout);
             continue;
         }
 
-        printf("Mesajul a fost receptionat...%s\n", msg);
-        send(client, msg, strlen(msg), 0);
+        printf("Alimentul a fost receptionat...: Nume=%s; Cantitate=%d\n",
+                 receivedAliment.nume, receivedAliment.cantity);
+        //send(client, msg, strlen(msg), 0);
         close(client);
     }
     

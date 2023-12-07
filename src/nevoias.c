@@ -14,6 +14,12 @@ extern int errno;
 /*portul de conectare la server*/
 int port;
 
+typedef struct {
+    int id;
+    char nume[50];
+    int cantity;
+} Aliment;
+
 int main(int argc, char*argv[]){
     int sd;/*socket descriptor*/
     struct sockaddr_in server;/*structura folosita pentru conectarea cu serverul*/
@@ -57,25 +63,33 @@ int main(int argc, char*argv[]){
     // char msg[100];
     // bzero(msg, 100);
     /* Message to be sent to the server after connection */
-    char msg_to_server[] = "Hello from nevoias";
+    //char msg_to_server[] = "Hello from nevoias";
+    Aliment alimentSurplus;
+    alimentSurplus.id = 1;//vine de la donator
+    printf("Introdu numele produsului: ");
+    fflush(stdout);
+    scanf("%49s", alimentSurplus.nume);
+    printf("Introdu cantitatea pentru %s:", alimentSurplus.nume);
+    fflush(stdout);
+    scanf("%d", &alimentSurplus.cantity);
 
-    /* Send a message to the server after connecting */
-    if (send(sd, msg_to_server, sizeof(msg_to_server), 0) <= 0) {
-        perror("[nevoias] Error sending message to server\n");
+
+    /*trimitem mesajul la server*/
+    //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
+    if(send(sd, &alimentSurplus, sizeof(Aliment), 0) <=0){
+        perror("[client] Eroare la write\n");
         return errno;
     }
 
-    
-    /**/
-    printf("inainte de recv\n");
+
     /*citirea mesajului*/
-    bzero(msg_rec, 100);
-    if(recv(sd, msg_rec, 100, 0) < 0){
-        perror("[nevoias]eroare la recv()\n");
-        return errno;
-    }
+    // bzero(msg_rec, 100);
+    // if(recv(sd, msg_rec, 100, 0) < 0){
+    //     perror("[nevoias]eroare la recv()\n");
+    //     return errno;
+    // }
 
-    printf("[nevoias]Mesajul primit este: %s\n", msg_rec);
+    // printf("[nevoias]Mesajul primit este: %s\n", msg_rec);
 
     /*inchidem conexiunea*/
     close(sd);
