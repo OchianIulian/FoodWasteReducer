@@ -1,11 +1,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
-#include <errno.h>
 #include <unistd.h>
+#include <errno.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 #include <string.h>
-#include <stdlib.h>
+
 
 /*Portul folosit*/
 #define PORT 2024
@@ -19,11 +21,55 @@ typedef struct {
     int cantity;
 } Aliment;
 
+/* functie de convertire a adresei IP a clientului in sir de caractere */
+char * conv_addr (struct sockaddr_in address)
+{
+  static char str[25];
+  char port[7];
+
+  /* adresa IP a clientului */
+  strcpy (str, inet_ntoa (address.sin_addr));	
+  /* portul utilizat de client */
+  bzero (port, 7);
+  sprintf (port, ":%d", ntohs (address.sin_port));	
+  strcat (str, port);
+  return (str);
+}
+
+/* realizeaza primirea si retrimiterea unui mesaj unui client */
+int transactions(int client, char *msg)
+{
+    Aliment receivedAliment;    
+    memset(&receivedAliment, 0, sizeof(Aliment));
+        
+    /*s-a realizat conexiunea, se asteapta mesajul*/
+    /*ne asiguram ca bufferul nu contine nimic*/
+    bzero(msg, 100);
+    printf("[server]asteptam alimentul...");
+    fflush(stdout);
+
+    /*citirea citim mesajul*/
+    if(recv(client, &receivedAliment, sizeof(Aliment), 0)<=0){//ultimul parametru este setat pe 0 pentru o operațiune de recepție standard.
+        perror("[server]Eroare la read() de la client");
+        fflush(stdout);
+        return -1;
+    }
+
+    printf("Alimentul a fost receptionat...: Nume=%s; Cantitate=%d\n",
+    receivedAliment.nume, receivedAliment.cantity);
+  
+    return 1;
+}
 
 int main(){
     struct sockaddr_in server;/*structura folosita de server*/
-    struct sockaddr_in from;/*structura clientului*/
-    struct sockaddr_in to;
+    struct sockaddr_in from;/*structura clientului care scrie*/
+
+    fd_set readfds;/*multimea descriptorilor de citire*/
+    fd_set actfds;/*multimea descriptorilor activi*/
+
+
+
     char msg[100];/*mesajul primit de la client*/
     char msgrasp[100]="";/*mesaj de raspuns pentru client*/
     int sd;/*socket descriptor*/
@@ -79,29 +125,12 @@ int main(){
             continue;
         }
 
-        Aliment receivedAliment;    
-        memset(&receivedAliment, 0, sizeof(Aliment));
-        
-        /*s-a realizat conexiunea, se asteapta mesajul*/
-        /*ne asiguram ca bufferul nu contine nimic*/
-        bzero(msg, 100);
-        printf("[server]asteptam alimentul...");
-        fflush(stdout);
-
-        /*citirea citim mesajul*/
-        if(recv(client, &receivedAliment, sizeof(Aliment), 0)<=0){//ultimul parametru este setat pe 0 pentru o operațiune de recepție standard.
-            perror("[server]Eroare la read() de la client");
-            fflush(stdout);
+        if(transactions(client, msg) == -1){
             continue;
         }
-
-        printf("Alimentul a fost receptionat...: Nume=%s; Cantitate=%d\n",
-                 receivedAliment.nume, receivedAliment.cantity);
         //send(client, msg, strlen(msg), 0);
         close(client);
     }
-    
-
 
     return 0;
 }
