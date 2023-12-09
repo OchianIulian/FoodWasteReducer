@@ -45,7 +45,7 @@ int transactions(int client, char *msg)
     /*s-a realizat conexiunea, se asteapta mesajul*/
     /*ne asiguram ca bufferul nu contine nimic*/
     bzero(msg, 100);
-    printf("[server]asteptam alimentul...");
+    printf("[server]asteptam alimentul...\n");
     fflush(stdout);
 
     /*citirea citim mesajul*/
@@ -67,19 +67,26 @@ int main(){
 
     fd_set readfds;/*multimea descriptorilor de citire*/
     fd_set actfds;/*multimea descriptorilor activi*/
-
+    struct timeval tv;/*structura de timp pentru select()*/
 
 
     char msg[100];/*mesajul primit de la client*/
     char msgrasp[100]="";/*mesaj de raspuns pentru client*/
-    int sd;/*socket descriptor*/
+    int sd, client;/*socket descriptors*/
+    int optval=1;/*optiune folosita pentru setsockopt()*/
+    int fd;/*descriptor folosit pentru parcurgerea listelor de descriptori*/
 
+    int nfds;/*numarul maxim de descriptor*/
+    int len;/*lungimea structurii sockaddr_in*/
+    
 
-    /*crearea unui socket*/
+    /*creare socket*/
     if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         perror("Eroare la crearea socketului\n");
         return errno;
     }
+    /*setam pentru socket optiunea SO_REUSEADDR*/
+    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
     /*pregatirea structurilor de date si initializarea lor cu 0*/
     bzero(&server, sizeof(server));
@@ -99,37 +106,67 @@ int main(){
         printf("Error code: %d\n", errno); 
         return errno;
     }
-
     /*punem serverul sa asculte daca vin clienti sa se conecteze, maxim 5 odata*/
     if(listen(sd, 5) == -1){
         perror("[server]Eroare la listen\n");
         return errno;
     }
+    /*compledam multumea de descriptori de citire*/
+    FD_ZERO(&actfds);/*ne asiguram ca inital multimea e vida*/
+    FD_SET(sd, &actfds);/*includem in multime socketul creat*/
 
-    /*servim in mod iterativ clientii*/
+    /*se va astepta timp de 1sec*/
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+
+    /*valoarea maxima a descriptorilor folositi*/
+    nfds = sd;
+
+    printf ("[server] Asteptam la portul %d...\n", PORT);
+    fflush (stdout);
+
+    /*servim in mod concurent clientii*/
     while (1)
     {
-        int client;
-        int length = sizeof(from);
-
-        printf("[server]Asteptam la portul %d...", PORT);
-        fflush(stdout);
-
-        /*acceptam un client ()*/
-        client = accept(sd, (struct sockaddr*)&from, &length);
-
-        /*eroare la acceptarea unui client*/
-        if(client<0){
-            perror("[server]Eroare la accept()");
-            fflush(stdout);
-            continue;
+        /*ajustam multimea descriptorilor activi (efectiv utilizati)*/
+        bcopy((char *)&actfds, (char *) &readfds, sizeof(readfds));//se copiaza readfds in actfds
+        //printf("1\n");
+        /*apelul select()*/
+        if(select(nfds+1, &readfds, NULL, NULL, &tv)<0){//tratam cazurile doar de citire momentan
+            perror("[server]Eroare la select()\n");
+            return errno;
         }
-
-        if(transactions(client, msg) == -1){
-            continue;
+        /*vedem daca e pregatit socketul pentru a-i accepta pe clienti*/
+        if(FD_ISSET(sd, &readfds)){
+            /*pregatirea structurii client*/
+            len = sizeof(from);
+            bzero(&from, sizeof(from));
+            /*a venit un client, acceptam conexiunea*/
+            if((client = accept(sd, (struct sockaddr*)&from, &len))<0){
+                perror("[server]eroare la accept()\n");
+                continue;;
+            }
+            /*ajustez vaoarea maxima de socket*/
+            if(nfds<client){
+                nfds=client;
+            }
+            /*includem in lista de descriptori activi si acest socket*/
+            FD_SET(client, &actfds);
+            printf("[server] S-a conectat clientul cu descriptorul %d, de la adresa %s.\n",client, conv_addr (from));
+	        fflush (stdout);
         }
-        //send(client, msg, strlen(msg), 0);
-        close(client);
+        /*vedem daca e pregatit vreun socket client pentru a transmite raspunsul*/
+        for(fd = 0; fd<=nfds; ++fd){/*parcurgem multimea de descriptori*/
+            /*este un socket de citire pregatit?*/
+            if(fd != sd && FD_ISSET(fd, &readfds)){
+                if(transactions(fd, msg)>0){
+                    printf ("[server] S-a deconectat clientul cu descriptorul %d.\n",fd);
+		            fflush (stdout);
+		            close (fd);		/* inchidem conexiunea cu clientul */
+		            FD_CLR (fd, &actfds);/* scoatem si din multime */
+                }
+            }
+        }
     }
 
     return 0;
