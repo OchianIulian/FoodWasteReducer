@@ -53,20 +53,7 @@ int setup_server(char *server_address){
     return sd;
 }
 
-int main(int argc, char*argv[]){
-    int sd;/*socket descriptor*/
-    char msg_rec[100];/*mesajul primit*/
-
-    /*exista toate argumentele in linia de comanda?*/
-    if(argc != 3){
-        printf("sintaxa: %s <adresa_server> <port>\n", argv[0]);
-        return errno;
-    }
-    /*stabilim portul*/
-    port  = atoi(argv[2]);
-    /*facem conexiunea si setam socketul*/
-    sd = setup_server(argv[1]);
-
+void transactions(int sd){
 
     Aliment alimentSurplus;
     alimentSurplus.id = 1;//vine de la donator
@@ -82,8 +69,25 @@ int main(int argc, char*argv[]){
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
     if(send(sd, &alimentSurplus, sizeof(Aliment), 0) <=0){
         perror("[client] Eroare la write\n");
+        exit(errno);
+    }
+}
+
+int main(int argc, char*argv[]){
+    int sd;/*socket descriptor*/
+    char msg_rec[100];/*mesajul primit*/
+
+    /*exista toate argumentele in linia de comanda?*/
+    if(argc != 3){
+        printf("sintaxa: %s <adresa_server> <port>\n", argv[0]);
         return errno;
     }
+    /*stabilim portul*/
+    port  = atoi(argv[2]);
+    /*facem conexiunea si setam socketul*/
+    sd = setup_server(argv[1]);
+
+    transactions(sd);
 
     /*inchidem conexiunea*/
     close(sd);
