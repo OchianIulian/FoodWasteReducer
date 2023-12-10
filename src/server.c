@@ -9,8 +9,11 @@
 #include <string.h>
 
 
+
 /*Portul folosit*/
 #define PORT 2024
+/*Cate tipuri de alimente poate stoca depozitul*/
+#define MAX_AlIMENTS 100;
 
 /*codul de eroare returnat de anumite apeluri*/
 extern int errno;
@@ -20,6 +23,13 @@ typedef struct {
     char nume[50];
     int cantity;
 } Aliment;
+
+
+/*definim structura pentru depozit*/
+typedef struct {
+    char name[50];
+    Aliment aliment[100];
+} Depozit;
 
 /* functie de convertire a adresei IP a clientului in sir de caractere */
 char * conv_addr (struct sockaddr_in address)
@@ -53,6 +63,12 @@ int transactions(int client, char *msg)
         perror("[server]Eroare la read() de la client");
         fflush(stdout);
         return -1;
+    }
+
+    if(receivedAliment.id == 0){
+        printf("Se face o donatie catre un nevoias\n");
+    } else {
+        printf("S-a primit o donatie puternica\n");
     }
 
     printf("Alimentul a fost receptionat...: Nume=%s; Cantitate=%d\n",

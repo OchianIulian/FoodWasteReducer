@@ -56,7 +56,7 @@ int setup_server(char *server_address){
 void transactions(int sd){
 
     Aliment alimentSurplus;
-    alimentSurplus.id = 1;//vine de la donator
+    alimentSurplus.id = 0;//vine de la nevoias
     printf("Introdu numele produsului: ");
     fflush(stdout);
     scanf("%49s", alimentSurplus.nume);
