@@ -64,7 +64,18 @@ int transactions(int client, char *msg)
 
     if(receivedAliment.id == 0){
         printf("Se face o donatie catre un nevoias\n");
-        //todo: de facut tranzactia catre nevoias
+        /*se creaza structura de trimis catre nevoias*/
+        Aliment aliment_de_trimis;
+        aliment_de_trimis.id = 2;//de trimis
+        if(get(&depozit, receivedAliment.nume) < receivedAliment.cantity){
+            aliment_de_trimis.cantity = get(&depozit, receivedAliment.nume);
+        } else {
+            aliment_de_trimis.cantity = receivedAliment.cantity;
+        }
+        strcpy(aliment_de_trimis.nume, receivedAliment.nume);
+
+        printf("Aliment de trimis: %s, %d\n", aliment_de_trimis.nume, aliment_de_trimis.cantity);
+
 
         /*se sterg elementele din depozitul local*/
         delete_values(&depozit, receivedAliment.nume, receivedAliment.cantity);

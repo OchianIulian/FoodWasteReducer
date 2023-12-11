@@ -55,22 +55,34 @@ int setup_server(char *server_address){
 
 void transactions(int sd){
 
-    Aliment alimentSurplus;
-    alimentSurplus.id = 0;//vine de la nevoias
+    Aliment aliment_cerut;
+    aliment_cerut.id = 0;//vine de la nevoias
     printf("Introdu numele produsului: ");
     fflush(stdout);
-    scanf("%49s", alimentSurplus.nume);
-    printf("Introdu cantitatea pentru %s:", alimentSurplus.nume);
+    scanf("%49s", aliment_cerut.nume);
+    printf("Introdu cantitatea pentru %s:", aliment_cerut.nume);
     fflush(stdout);
-    scanf("%d", &alimentSurplus.cantity);
+    scanf("%d", &aliment_cerut.cantity);
 
 
     /*trimitem mesajul la server*/
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
-    if(send(sd, &alimentSurplus, sizeof(Aliment), 0) <=0){
+    if(send(sd, &aliment_cerut, sizeof(Aliment), 0) <=0){
         perror("[client] Eroare la write\n");
         exit(errno);
     }
+
+    /*pregatesc structura sa primeasca alementele cerute*/
+    memset(&aliment_cerut,0, sizeof(Aliment));
+    if(recv(sd, &aliment_cerut, sizeof(Aliment), 0) <= 0){
+        perror("[nevoias]eroare la recv\n");
+        exit(errno);
+    }
+
+    printf("Alimentul primit e:\n");
+    printf("%s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
+
+
 }
 
 int main(int argc, char*argv[]){
