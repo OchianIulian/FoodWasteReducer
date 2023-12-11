@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <string.h>
-
+#include "map.h"
 
 
 /*Portul folosit*/
@@ -25,11 +25,8 @@ typedef struct {
 } Aliment;
 
 
-/*definim structura pentru depozit*/
-typedef struct {
-    char name[50];
-    Aliment aliment[100];
-} Depozit;
+/*depozitul de alimente*/
+Map depozit;
 
 /* functie de convertire a adresei IP a clientului in sir de caractere */
 char * conv_addr (struct sockaddr_in address)
@@ -67,8 +64,14 @@ int transactions(int client, char *msg)
 
     if(receivedAliment.id == 0){
         printf("Se face o donatie catre un nevoias\n");
+        //todo: de facut tranzactia catre nevoias
+
+        /*se sterg elementele din depozitul local*/
+        delete_values(&depozit, receivedAliment.nume, receivedAliment.cantity);
     } else {
         printf("S-a primit o donatie puternica\n");
+        /*se adauga elementele in depozit*/
+        add_items(&depozit, receivedAliment.nume, receivedAliment.cantity);
     }
 
     printf("Alimentul a fost receptionat...: Nume=%s; Cantitate=%d\n",
