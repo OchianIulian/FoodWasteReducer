@@ -13,7 +13,7 @@
 /*Portul folosit*/
 #define PORT 2024
 /*Cate tipuri de alimente poate stoca depozitul*/
-#define MAX_AlIMENTS 100;
+#define MAX_AlIMENTS 1000;
 
 /*codul de eroare returnat de anumite apeluri*/
 extern int errno;
@@ -38,6 +38,7 @@ char * conv_addr (struct sockaddr_in address)
   strcpy (str, inet_ntoa (address.sin_addr));	
   /* portul utilizat de client */
   bzero (port, 7);
+  /*sprintf actioneaza ca un printf doar ca outputul il copiaza in a bufferul 'port'*/
   sprintf (port, ":%d", ntohs (address.sin_port));	
   strcat (str, port);
   return (str);
@@ -91,25 +92,10 @@ int transactions(int client, char *msg)
     return 1;
 }
 
-int main(){
+int setup_server(){
     struct sockaddr_in server;/*structura folosita de server*/
-    struct sockaddr_in from;/*structura clientului care scrie*/
-
-    fd_set readfds;/*multimea descriptorilor de citire*/
-    fd_set actfds;/*multimea descriptorilor activi*/
-    struct timeval tv;/*structura de timp pentru select()*/
-
-
-    char msg[100];/*mesajul primit de la client*/
-    char msgrasp[100]="";/*mesaj de raspuns pentru client*/
-    int sd, client;/*socket descriptors*/
-    int optval=1;/*optiune folosita pentru setsockopt()*/
-    int fd;/*descriptor folosit pentru parcurgerea listelor de descriptori*/
-
-    int nfds;/*numarul maxim de descriptor*/
-    int len;/*lungimea structurii sockaddr_in*/
-    
-
+    int sd;
+    int optval = 1;
     /*creare socket*/
     if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         perror("Eroare la crearea socketului\n");
@@ -120,7 +106,6 @@ int main(){
 
     /*pregatirea structurilor de date si initializarea lor cu 0*/
     bzero(&server, sizeof(server));
-    bzero(&from, sizeof(from));
 
     /*umplem structura folosita de server*/
     /*stabilirea tipului de adresa a socketului/familiei socketului*/
@@ -130,7 +115,7 @@ int main(){
     /*setam portul*/
     server.sin_port = htons(PORT);
 
-    /*se atașează un socketul la adresa IP și portul specific*/
+     /*se atașează un socketul la adresa IP și portul specific*/
     if(bind(sd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1){
         perror("[server]eroare la bind()\n");
         printf("Error code: %d\n", errno); 
@@ -141,7 +126,36 @@ int main(){
         perror("[server]Eroare la listen\n");
         return errno;
     }
-    /*compledam multumea de descriptori de citire*/
+
+    return sd;
+}
+
+
+int main(){
+   
+    struct sockaddr_in from;/*structura clientului care scrie*/
+
+    fd_set readfds;/*multimea descriptorilor de citire*/
+    fd_set actfds;/*multimea descriptorilor activi*/
+    struct timeval tv;/*structura de timp pentru select()*/
+
+
+    char msg[100];/*mesajul primit de la client*/
+    char msgrasp[100]="";/*mesaj de raspuns pentru client*/
+    int sd, client;/*socket descriptors*/
+    int optval=1;/*optiune folosita pentru setsockopt()
+                    1 inseamna ca optiunea e activata*/
+    int fd;/*descriptor folosit pentru parcurgerea listelor de descriptori*/
+
+    int nfds;/*numarul maxim de descriptor*/
+    int len;/*lungimea structurii sockaddr_in*/
+    
+    sd = setup_server();
+    
+    bzero(&from, sizeof(from));
+
+    
+    /*completam multimea de descriptori de citire*/
     FD_ZERO(&actfds);/*ne asiguram ca inital multimea e vida*/
     FD_SET(sd, &actfds);/*includem in multime socketul creat*/
 
@@ -160,7 +174,6 @@ int main(){
     {
         /*ajustam multimea descriptorilor activi (efectiv utilizati)*/
         bcopy((char *)&actfds, (char *) &readfds, sizeof(readfds));//se copiaza readfds in actfds
-        //printf("1\n");
         /*apelul select()*/
         if(select(nfds+1, &readfds, NULL, NULL, &tv)<0){//tratam cazurile doar de citire momentan
             perror("[server]Eroare la select()\n");
