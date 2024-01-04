@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <stdlib.h>
+#include <sqlite3.h>
 #include "map.h"
 
 
@@ -90,6 +92,19 @@ int transactions(int client, char *msg)
     receivedAliment.nume, receivedAliment.cantity);
   
     return 1;
+}
+
+int connect_to_database(sqlite3 *db){
+    int rc;//return code
+    rc = sqlite3_open("depozit.db", &db);
+	
+	if(rc){
+		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+      		return(-1);
+	} else {
+		fprintf(stderr, "Opened database successfully\n");
+	}
+	return rc;
 }
 
 int setup_server(){
