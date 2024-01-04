@@ -42,8 +42,6 @@ int setup_server(char *server_address){
     /*stabilim id ul*/
     server.sin_addr.s_addr = inet_addr(server_address);
 
-    printf("inainte de connect\n");
-
     /*ne conectam la server*/
     if(connect(sd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1){
         perror("[nevoias]eroare la connect\n");

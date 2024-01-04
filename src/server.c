@@ -68,8 +68,8 @@ int transactions(int client, char *msg)
         /*se creaza structura de trimis catre nevoias*/
         Aliment aliment_de_trimis;
         aliment_de_trimis.id = 2;//de trimis
-        if(get(&depozit, receivedAliment.nume) < receivedAliment.cantity){
-            aliment_de_trimis.cantity = get(&depozit, receivedAliment.nume);
+        if(getValue(&depozit, receivedAliment.nume) < receivedAliment.cantity){
+            aliment_de_trimis.cantity = getValue(&depozit, receivedAliment.nume);
         } else {
             aliment_de_trimis.cantity = receivedAliment.cantity;
         }

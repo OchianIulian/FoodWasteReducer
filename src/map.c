@@ -60,7 +60,7 @@ void delete_key(Map *map, char key[]){
     map->size--;
 }
 
-int get(Map *map,char key[]){
+int getValue(Map *map,char key[]){
     int index = getIndex(map, key); 
     if (index == -1) { // Key not found 
         return -1; 

@@ -23,7 +23,7 @@ void delete_values(Map *map,char key[], int value);
 /*sterge un element din lista*/
 void delete_key(Map *map,char key[]);
 /*returneaza valoarea unui element cu cheia key*/
-int get(Map *map,char key[]);
+int getValue(Map *map,char key[]);
 /*afiseaza elementele map ului*/
 void printMap(Map *map);
 
