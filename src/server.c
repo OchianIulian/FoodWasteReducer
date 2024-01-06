@@ -258,6 +258,7 @@ int main(){
     /*Database*/
     sqlite3 *db;
     db = connect_to_database(db);
+    readData(db);
     
 
 
