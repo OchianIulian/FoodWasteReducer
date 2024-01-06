@@ -32,13 +32,14 @@ Map depozit;
 
 /*database transactions*/
 /*Create connection to database*/
-int connect_to_database(sqlite3 *db){
+sqlite3 * connect_to_database(sqlite3 *db){
     int rc;//return code
     rc = sqlite3_open("depozit.db", &db);
 	
 	if(rc != SQLITE_OK){
 		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-      		return(-1);
+        sqlite3_close(db);
+      	return NULL;
 	} else {
 		fprintf(stderr, "Opened database successfully\n");
 	}
@@ -51,7 +52,7 @@ int connect_to_database(sqlite3 *db){
     } else {
         fprintf(stdout, "Tabelul 'MapData' a fost creat cu succes sau exista deja!\n");
     }
-	return rc;
+	return db;
 }
 
 
@@ -255,12 +256,8 @@ int main(){
 
     /*Database*/
     sqlite3 *db;
-    int rc = connect_to_database(db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Error connecting to database\n");
-        return -1;
-    }
-
+    db = connect_to_database(db);
+    
 
 
     sd = setup_server();
