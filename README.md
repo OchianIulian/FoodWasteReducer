@@ -3,5 +3,11 @@
 # Compilare server
 gcc server.c map.c -o server -lsqlite3
 
-# Rulare executabil
+# Compilare donator
+./donator 0 2024
+
+# Compilare Nevoias
+./donator 0 2024
+
+# Rulare executabil server
 ./server
