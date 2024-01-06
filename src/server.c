@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include "map.h"
+#include "dbtransactions.h"
 
 
 /*Portul folosit*/
