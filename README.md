@@ -1,7 +1,7 @@
 # FoodWasteReducer
 
 # Compilare server
-gcc server.c map.c -o server -lsqlite3
+gcc server.c map.c dbtransactions.c -o server -lsqlite3 
 
 # Compilare donator
 ./donator 0 2024
