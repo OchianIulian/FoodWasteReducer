@@ -86,8 +86,7 @@ void cerere_nevoias(int sd){
         exit(errno);
     }
 
-    printf("Alimentul primit e:\n");
-    printf("%s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
+    printf("Alimentul primit e %s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
 }
 
 void cerere_organizatie(int sd){
@@ -131,7 +130,7 @@ void cerere_organizatie(int sd){
     printMap(&ListaAlimente);
 
     /*trimitem alimentele catre server*/
-    
+
 
 
 }

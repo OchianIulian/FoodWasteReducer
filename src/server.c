@@ -81,6 +81,10 @@ int transactions(int client, char *msg, sqlite3 *db)
 
         printf("Aliment de trimis: %s, %d\n", aliment_de_trimis.nume, aliment_de_trimis.cantity);
 
+        if(send(client, &aliment_de_trimis, sizeof(Aliment), 0 <= 0)){
+            perror("[server] Eroare la trimiterea alimentului catre nevoias\n");
+            exit(errno);
+        }
 
         /*se sterg elementele din depozitul local*/
         delete_values(&depozit, receivedAliment.nume, receivedAliment.cantity);
