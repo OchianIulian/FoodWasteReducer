@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
+#include <stdbool.h>
+#include <arpa/inet.h>
+#include "map.h"
 
 /*codul de eroare returnat de anumite apeluri*/
 extern int errno;
@@ -19,6 +22,8 @@ typedef struct {
     char nume[50];
     int cantity;
 } Aliment;
+
+Map ListaAlimente;
 
 int setup_server(char *server_address){
     int sd;/*socket descriptor*/
@@ -51,8 +56,8 @@ int setup_server(char *server_address){
     return sd;
 }
 
-void transactions(int sd){
-
+void cerere_nevoias(int sd){
+    printf("sunt un nevoias\n");
     Aliment aliment_cerut;
     aliment_cerut.id = 0;//vine de la nevoias
     printf("Introdu numele produsului: ");
@@ -79,25 +84,54 @@ void transactions(int sd){
 
     printf("Alimentul primit e:\n");
     printf("%s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
+}
 
+void cerere_organizatie(int sd){
+    printf("sunt o organizatie\n");
+    
+}
 
+void transactions(int sd, bool is_oc){
+
+    if(is_oc == true){
+        cerere_organizatie(sd);
+    } else {
+        cerere_nevoias(sd);
+    }
 }
 
 int main(int argc, char*argv[]){
     int sd;/*socket descriptor*/
     char msg_rec[100];/*mesajul primit*/
 
+    bool is_oc;//verifica daca este organizatie caritabila
+    
+
     /*exista toate argumentele in linia de comanda?*/
-    if(argc != 3){
-        printf("sintaxa: %s <adresa_server> <port>\n", argv[0]);
+    if(argc < 3 || argc > 4){
+        printf("sintaxa: %s [-oc] <adresa_server> <port>\n", argv[0]);
         return errno;
     }
     /*stabilim portul*/
-    port  = atoi(argv[2]);
-    /*facem conexiunea si setam socketul*/
-    sd = setup_server(argv[1]);
+    if(argc == 3){
+        is_oc = false;
+        port  = atoi(argv[2]);
+        /*facem conexiunea si setam socketul*/
+        sd = setup_server(argv[1]);
+    } else if(argc == 4){
+        if(strcmp(argv[1], "-oc") != 0){
+            printf("sintaxa: %s [-oc] <adresa_server> <port>\n", argv[0]);
+            return errno;
+        }
+        printf("E organizatie caritabila\n");
+        is_oc = true;
+        port = atoi(argv[3]);
+        /*facem conexiunea si setam socketul*/
+        sd = setup_server(argv[2]);
+    }
+    
 
-    transactions(sd);
+    transactions(sd, is_oc);
 
     /*inchidem conexiunea*/
     close(sd);
