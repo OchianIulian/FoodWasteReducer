@@ -4,7 +4,7 @@
 gcc server.c map.c dbtransactions.c -o server -lsqlite3 
 
 # Compilare nevoias.c
-gcc nevoas.c map.c -o nevoias 
+gcc nevoias.c map.c -o nevoias 
 
 # Compilare donator.c
 gcc donator.c -o donator 
@@ -16,7 +16,7 @@ gcc donator.c -o donator
 ./nevoias 0 2024
 
 # Rulare executabil organizatie caritabila
-./donator -og 0 2024
+./donator -oc 0 2024
 
 # Rulare executabil server
 ./server

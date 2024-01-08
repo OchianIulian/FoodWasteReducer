@@ -49,57 +49,66 @@ char * conv_addr (struct sockaddr_in address)
 }
 
 /* realizeaza primirea si retrimiterea unui mesaj unui client */
-int transactions(int client, char *msg, sqlite3 *db)
+int transactions(int client, sqlite3 *db)
 {
-    Aliment receivedAliment;    
-    memset(&receivedAliment, 0, sizeof(Aliment));
-        
+    Map alimentsReceived;
+    memset(&alimentsReceived, 0, sizeof(Map));
+      
     /*s-a realizat conexiunea, se asteapta mesajul*/
     /*ne asiguram ca bufferul nu contine nimic*/
-    bzero(msg, 100);
-    printf("[server]asteptam alimentul...\n");
+    printf("[server]asteptam alimentele...\n");
     fflush(stdout);
 
     /*citirea citim mesajul*/
-    if(recv(client, &receivedAliment, sizeof(Aliment), 0)<=0){//ultimul parametru este setat pe 0 pentru o operațiune de recepție standard.
+    if(recv(client, &alimentsReceived, sizeof(Map), 0)<=0){//ultimul parametru este setat pe 0 pentru o operațiune de recepție standard.
         perror("[server]Eroare la read() de la client");
         fflush(stdout);
         return -1;
     }
 
-    if(receivedAliment.id == 0){
+    printf("Alimentele au fost receptionate...: \n");
+    printMap(&alimentsReceived);
+    
+    if(alimentsReceived.id == 0){
         printf("Se face o donatie catre un nevoias\n");
         /*se creaza structura de trimis catre nevoias*/
-        Aliment aliment_de_trimis;
-        aliment_de_trimis.id = 2;//de trimis
-        if(getValue(&depozit, receivedAliment.nume) < receivedAliment.cantity){
-            aliment_de_trimis.cantity = getValue(&depozit, receivedAliment.nume);
-        } else {
-            aliment_de_trimis.cantity = receivedAliment.cantity;
+        Map aliments_to_send;
+        aliments_to_send.size=0;
+        for(int i=0; i<alimentsReceived.size; ++i){
+            strcpy(aliments_to_send.keys[i], alimentsReceived.keys[i]);
+            if(getValue(&depozit, alimentsReceived.keys[i]) < alimentsReceived.values[i]){
+                aliments_to_send.values[i] = getValue(&depozit, alimentsReceived.keys[i]);
+            } else {
+                aliments_to_send.values[i] = alimentsReceived.values[i];
+            }
+            aliments_to_send.size++;
+            /*se sterg elementele din depozitul local*/
+            delete_values(&depozit, aliments_to_send.keys[i], aliments_to_send.values[i]);
         }
-        strcpy(aliment_de_trimis.nume, receivedAliment.nume);
 
-        printf("Aliment de trimis: %s, %d\n", aliment_de_trimis.nume, aliment_de_trimis.cantity);
+        printf("Alimente de trimis:\n");
+        printMap(&aliments_to_send);
 
-        if(send(client, &aliment_de_trimis, sizeof(Aliment), 0 <= 0)){
+        if(send(client, &aliments_to_send, sizeof(Map), 0)<=0){
             perror("[server] Eroare la trimiterea alimentului catre nevoias\n");
             exit(errno);
         }
-
-        /*se sterg elementele din depozitul local*/
-        delete_values(&depozit, receivedAliment.nume, receivedAliment.cantity);
     } else {
         printf("S-a primit o donatie puternica\n");
         /*se adauga elementele in depozit*/
-        add_items(&depozit, receivedAliment.nume, receivedAliment.cantity);
+        add_items(&depozit, alimentsReceived.keys[0], alimentsReceived.values[0]);
     }
 
-    printf("Alimentul a fost receptionat...: Nume=%s; Cantitate=%d\n",
-    receivedAliment.nume, receivedAliment.cantity);
 
     /*dupa ce s-au facut tranzactiile inseram si in baza de date*/
-    insertOrUpdateData(db,receivedAliment.nume, getValue(&depozit, receivedAliment.nume));
-    printf("S-au scris in baza de date: %s, %d;\n", receivedAliment.nume, getValue(&depozit, receivedAliment.nume));
+    for(int i=0; i<alimentsReceived.size; ++i)
+        insertOrUpdateData(
+            db,alimentsReceived.keys[i],
+            getValue(&depozit, alimentsReceived.keys[i]));
+    
+    printf("S-au scris in baza de date:");
+    printMap(&depozit);
+
     return 1;
 }
 
@@ -150,8 +159,6 @@ int main(){
     fd_set actfds;/*multimea descriptorilor activi*/
     struct timeval tv;/*structura de timp pentru select()*/
 
-
-    char msg[100];/*mesajul primit de la client*/
     char msgrasp[100]="";/*mesaj de raspuns pentru client*/
     int sd, client;/*socket descriptors*/
     int optval=1;/*optiune folosita pentru setsockopt()
@@ -165,14 +172,11 @@ int main(){
     sqlite3 *db;
     db = connect_to_database(db);
     readData(db, &depozit);
-    
-
 
     sd = setup_server();
     
     bzero(&from, sizeof(from));
 
-    
     /*completam multimea de descriptori de citire*/
     FD_ZERO(&actfds);/*ne asiguram ca inital multimea e vida*/
     FD_SET(sd, &actfds);/*includem in multime socketul creat*/
@@ -220,7 +224,7 @@ int main(){
         for(fd = 0; fd<=nfds; ++fd){/*parcurgem multimea de descriptori*/
             /*este un socket de citire pregatit?*/
             if(fd != sd && FD_ISSET(fd, &readfds)){
-                if(transactions(fd, msg, db)>0){
+                if(transactions(fd, db)>0){
                     printf ("[server] S-a deconectat clientul cu descriptorul %d.\n",fd);
 		            fflush (stdout);
 		            close (fd);		/* inchidem conexiunea cu clientul */

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
+#include "map.h"
 
 /*codul de eroare returnat de anumite apeluri*/
 extern int errno;
@@ -19,6 +20,8 @@ typedef struct {
     char nume[50];
     int cantity;
 } Aliment;
+
+Map ListaAlimente;
 
 int setup_server(char *server_address){
     int sd;//descriptorul de socket
@@ -56,10 +59,14 @@ void transactions(int sd){
     fflush(stdout);
     scanf("%d", &alimentSurplus.cantity);
 
+    ListaAlimente.id = 1;
+    ListaAlimente.size++;
+    strcpy(ListaAlimente.keys[0], alimentSurplus.nume);
+    ListaAlimente.values[0] = alimentSurplus.cantity;
 
     /*trimitem mesajul la server*/
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
-    if(send(sd, &alimentSurplus, sizeof(Aliment), 0) <=0){
+    if(send(sd, &ListaAlimente, sizeof(Map), 0) <=0){
         perror("[client] Eroare la write\n");
         exit(errno);
     }

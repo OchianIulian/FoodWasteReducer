@@ -74,19 +74,21 @@ void cerere_nevoias(int sd){
 
     /*trimitem mesajul la server*/
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
-    if(send(sd, &aliment_cerut, sizeof(Aliment), 0) <=0){
+    if(send(sd, &ListaAlimente, sizeof(Map), 0) <=0){
         perror("[client] Eroare la write\n");
         exit(errno);
     }
 
     /*pregatesc structura sa primeasca alementele cerute*/
-    memset(&aliment_cerut,0, sizeof(Aliment));
-    if(recv(sd, &aliment_cerut, sizeof(Aliment), 0) <= 0){
+    memset(&ListaAlimente,0, sizeof(Map));
+    if(recv(sd, &ListaAlimente, sizeof(Map), 0) <= 0){
         perror("[nevoias]eroare la recv\n");
         exit(errno);
     }
 
-    printf("Alimentul primit e %s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
+    printf("Am primit:\n");
+    printMap(&ListaAlimente);
+    //printf("Alimentul primit e %s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
 }
 
 void cerere_organizatie(int sd){
@@ -108,6 +110,8 @@ void cerere_organizatie(int sd){
         }
     }
 
+    ListaAlimente.id = 0;//marcam ca pleaca de la nevoias
+
     int i=1;
     while(nrAliments > 0){
         Aliment aliment_cerut;
@@ -120,7 +124,6 @@ void cerere_organizatie(int sd){
         scanf("%d", &aliment_cerut.cantity);
 
         /*Adaugam alimentele in Lista de trimis*/
-        ListaAlimente.id = 0;//marcam ca pleaca de la nevoias
         insert(&ListaAlimente, aliment_cerut.nume, aliment_cerut.cantity);
 
         ++i;
@@ -130,9 +133,22 @@ void cerere_organizatie(int sd){
     printMap(&ListaAlimente);
 
     /*trimitem alimentele catre server*/
+    /*trimitem mesajul la server*/
+    //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
+    if(send(sd, &ListaAlimente, sizeof(Map), 0) <=0){
+        perror("[client] Eroare la write\n");
+        exit(errno);
+    }
 
+    /*pregatesc structura sa primeasca alementele cerute*/
+    memset(&ListaAlimente,0, sizeof(Map));
+    if(recv(sd, &ListaAlimente, sizeof(Map), 0) <= 0){
+        perror("[nevoias]eroare la recv\n");
+        exit(errno);
+    }
 
-
+    printf("Am primit:\n");
+    printMap(&ListaAlimente);
 }
 
 void transactions(int sd, bool is_oc){
