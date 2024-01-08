@@ -73,7 +73,6 @@ void insertOrUpdateData(sqlite3 *db, const char *key, int value){
     if(rc != SQLITE_DONE){
         fprintf(stderr, "Eroare la executia interogarii UPDATE/INSERT: %s\n", sqlite3_errmsg(db));
     }
-    printf("S-a adaugat produsul in baza de date, totul e ok\n");
     sqlite3_finalize(stmt);
 }
 

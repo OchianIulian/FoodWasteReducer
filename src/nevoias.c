@@ -130,8 +130,6 @@ void cerere_organizatie(int sd){
         --nrAliments;
     }
 
-    printMap(&ListaAlimente);
-
     /*trimitem alimentele catre server*/
     /*trimitem mesajul la server*/
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard

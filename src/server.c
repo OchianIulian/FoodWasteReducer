@@ -66,11 +66,12 @@ int transactions(int client, sqlite3 *db)
         return -1;
     }
 
-    printf("Alimentele au fost receptionate...: \n");
-    printMap(&alimentsReceived);
     
     if(alimentsReceived.id == 0){
-        printf("Se face o donatie catre un nevoias\n");
+        printf("Alimentele au fost receptionate...: \n");
+        printMap(&alimentsReceived);
+        printf("Se face o donatie catre un nevoias...\n");
+        
         /*se creaza structura de trimis catre nevoias*/
         Map aliments_to_send;
         aliments_to_send.size=0;
@@ -95,6 +96,8 @@ int transactions(int client, sqlite3 *db)
         }
     } else {
         printf("S-a primit o donatie puternica\n");
+        printf("Alimentele au fost receptionate...: \n");
+        printMap(&alimentsReceived);
         /*se adauga elementele in depozit*/
         add_items(&depozit, alimentsReceived.keys[0], alimentsReceived.values[0]);
     }
@@ -106,8 +109,10 @@ int transactions(int client, sqlite3 *db)
             db,alimentsReceived.keys[i],
             getValue(&depozit, alimentsReceived.keys[i]));
     
-    printf("S-au scris in baza de date:");
-    printMap(&depozit);
+    printf("Database was updated\n");
+
+    //printf("S-au scris in baza de date:");
+    //printMap(&depozit);
 
     return 1;
 }
