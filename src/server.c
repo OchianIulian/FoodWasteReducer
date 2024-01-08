@@ -94,6 +94,14 @@ int transactions(int client, sqlite3 *db)
             perror("[server] Eroare la trimiterea alimentului catre nevoias\n");
             exit(errno);
         }
+
+        char msg[100] = {0};
+        if(read(client, msg, sizeof(msg))<=0){
+            perror("[server]Eroare la read() de la client mesaj de confirmare");
+            fflush(stdout);
+            return -1;
+        }
+        printf("%s\n", msg);
     } else {
         printf("S-a primit o donatie puternica\n");
         printf("Alimentele au fost receptionate...: \n");

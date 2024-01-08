@@ -88,7 +88,12 @@ void cerere_nevoias(int sd){
 
     printf("Am primit:\n");
     printMap(&ListaAlimente);
-    //printf("Alimentul primit e %s si cantitatea %d\n", aliment_cerut.nume, aliment_cerut.cantity);
+
+    char *msg = "[nevoias] Multumesc din suflet pentru donatii";
+    if(send(sd, msg, strlen(msg), 0) <=0){
+        perror("[client] Eroare la write\n");
+        exit(errno);
+    }
 }
 
 void cerere_organizatie(int sd){
@@ -131,7 +136,6 @@ void cerere_organizatie(int sd){
     }
 
     /*trimitem alimentele catre server*/
-    /*trimitem mesajul la server*/
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
     if(send(sd, &ListaAlimente, sizeof(Map), 0) <=0){
         perror("[client] Eroare la write\n");
@@ -147,6 +151,14 @@ void cerere_organizatie(int sd){
 
     printf("Am primit:\n");
     printMap(&ListaAlimente);
+
+    char *msg = "[oraganizatie] Multumim din suflet pentru donatii";
+    if(send(sd, msg, strlen(msg), 0) <=0){
+        perror("[client] Eroare la write\n");
+        exit(errno);
+    }
+
+    printf("%s", msg);
 }
 
 void transactions(int sd, bool is_oc){
