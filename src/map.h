@@ -4,6 +4,7 @@
 #define MAX_SIZE 100
 
 typedef struct  {
+    int id;
     int size;
     char keys[MAX_SIZE][100];
     int values[MAX_SIZE];

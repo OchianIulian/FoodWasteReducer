@@ -67,6 +67,10 @@ void cerere_nevoias(int sd){
     fflush(stdout);
     scanf("%d", &aliment_cerut.cantity);
 
+    /*Adaugam alimentul la Lista de alimente pe care o vom trimite*/
+    ListaAlimente.id = 0;//marcam ca pleaca de la nevoias
+    insert(&ListaAlimente, aliment_cerut.nume, aliment_cerut.cantity);
+
 
     /*trimitem mesajul la server*/
     //ultimul paramentru e setat pe 0 pentru operatia de trimitere standard
@@ -88,7 +92,48 @@ void cerere_nevoias(int sd){
 
 void cerere_organizatie(int sd){
     printf("sunt o organizatie\n");
+    int nrAliments;//numarul maxim de alimente pe care le poate cere
+    printf("Introdu cate produse vrei sa ceri: ");
+    fflush(stdout);
+    scanf("%d", &nrAliments);
+    if(nrAliments > 10){
+        printf("Iti putem oferi doar 10 alimente e ok pt tine? Y/N\n");
+        char response;
+        scanf(" %c", &response);
+        if(response == 'Y'){
+            printf("E bine poftim\n");
+            nrAliments = 10;
+        } else {
+            printf("Ok la revedere\n");
+            exit(errno);
+        }
+    }
+
+    int i=1;
+    while(nrAliments > 0){
+        Aliment aliment_cerut;
+        aliment_cerut.id = 0;//vine de la nevoias
+        printf("Introdu numele produsului cu id %d: ", i);
+        fflush(stdout);
+        scanf("%49s", aliment_cerut.nume);
+        printf("Introdu cantitatea pentru %s: ", aliment_cerut.nume);
+        fflush(stdout);
+        scanf("%d", &aliment_cerut.cantity);
+
+        /*Adaugam alimentele in Lista de trimis*/
+        ListaAlimente.id = 0;//marcam ca pleaca de la nevoias
+        insert(&ListaAlimente, aliment_cerut.nume, aliment_cerut.cantity);
+
+        ++i;
+        --nrAliments;
+    }
+
+    printMap(&ListaAlimente);
+
+    /*trimitem alimentele catre server*/
     
+
+
 }
 
 void transactions(int sd, bool is_oc){
