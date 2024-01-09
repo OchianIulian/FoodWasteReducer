@@ -12,7 +12,7 @@
 #include "map.h"
 
 /*codul de eroare returnat de anumite apeluri*/
-extern int errno;
+extern int errno;//cu errno poti obtine inofrmatii despre eroarea rezultata
 
 /*portul de conectare la server*/
 int port;
@@ -34,18 +34,18 @@ int setup_server(char *server_address){
         ultimul parametru e 0, ca valoare pentru protocol, sa fie ales automat de sistem
         TCP, UDP, IP, HTTP, SMTP
     */
-    if((sd = socket(AF_INET, SOCK_STREAM, 0))==-1){
+    if((sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==-1){
         perror("[nevoias]eroare la socket()\n");
         return errno;
     }
 
     /*umplem structura folosita pentru conectarea cu serverul*/
     /*stabilim familia*/
-    server.sin_family = AF_INET;
+    server.sin_family = AF_INET;//protocol pentru versiunea 4 IPv4 (192.168.0.1)
     /*stabilim portul*/
-    server.sin_port = htons(port);
+    server.sin_port = htons(port);//converteste din formatul gazda in formatul retea
     /*stabilim id ul*/
-    server.sin_addr.s_addr = inet_addr(server_address);
+    server.sin_addr.s_addr = inet_addr(server_address);//converteste din ascii in binar pt a putea fi folosit in retea
 
     /*ne conectam la server*/
     if(connect(sd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1){
@@ -157,8 +157,6 @@ void cerere_organizatie(int sd){
         perror("[client] Eroare la write\n");
         exit(errno);
     }
-
-    printf("%s", msg);
 }
 
 void transactions(int sd, bool is_oc){
@@ -172,11 +170,8 @@ void transactions(int sd, bool is_oc){
 
 int main(int argc, char*argv[]){
     int sd;/*socket descriptor*/
-    char msg_rec[100];/*mesajul primit*/
-
     bool is_oc;//verifica daca este organizatie caritabila
     
-
     /*exista toate argumentele in linia de comanda?*/
     if(argc < 3 || argc > 4){
         printf("sintaxa: %s [-oc] <adresa_server> <port>\n", argv[0]);

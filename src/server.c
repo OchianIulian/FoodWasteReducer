@@ -87,7 +87,7 @@ int transactions(int client, sqlite3 *db)
             delete_values(&depozit, aliments_to_send.keys[i], aliments_to_send.values[i]);
         }
 
-        printf("Alimente de trimis:\n");
+        printf("Alimente trimise:\n");
         printMap(&aliments_to_send);
 
         if(send(client, &aliments_to_send, sizeof(Map), 0)<=0){
@@ -130,7 +130,7 @@ int setup_server(){
     int sd;
     int optval = 1;
     /*creare socket*/
-    if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+    if((sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
         perror("Eroare la crearea socketului\n");
         return errno;
     }

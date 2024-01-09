@@ -28,7 +28,7 @@ int setup_server(char *server_address){
     struct sockaddr_in server;//structura pentru server
 
     /*ultimul parametru e 0, ca valoare pentru protocol, sa fie ales automat de sistem*/
-    if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+    if((sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
         perror("eroare la crearea socketului");
         return errno;
     }
