@@ -2,7 +2,7 @@
 
 FoodWasteReducer este o aplicație client-server proiectată pentru a conecta persoanele nevoiașe cu organizațiile caritabile, având ca scop reducerea deșeurilor alimentare prin redistribuirea hranei excedentare către cei care au nevoie de ea.
 
-Caracteristici
+## Caracteristici
 - Arhitectură Client-Server: Implementează un model client-server pentru comunicarea între utilizatorii în nevoie și organizațiile caritabile.
 - Listare Alimente: Utilizatorii pot lista alimente excedentare pe care doresc să le doneze sau să le primească.
 - Algoritm de Potrivire: Utilizează un algoritm de potrivire pentru a conecta donatorii cu destinatarii in functie de disponibilitatea alimentelor și preferințe.
